@@ -55,17 +55,17 @@ const SmartMap = lazy(() => import("@/components/smart-map"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SmartRoute — Pathfinding & Cryptography Visualizer" },
+      { title: "Algorithm & Complexity — Pathfinding & Cryptography Visualizer" },
       {
         name: "description",
         content:
           "Watch A*, Dijkstra, Greedy Best-First and Floyd-Warshall race across a live map of the Philippines while RSA, AES-GCM and SHA-256 run step by step.",
       },
-      { property: "og:title", content: "SmartRoute — Pathfinding & Cryptography Visualizer" },
+      { property: "og:title", content: "Algorithm & Complexity — Pathfinding & Cryptography Visualizer" },
       {
         property: "og:description",
         content:
-          "An interactive visualizer that runs classic pathfinding algorithms on a live map alongside real, step-by-step cryptography — 100% client-side.",
+          "An interactive visualizer that runs classic pathfinding algorithms on a live map alongside real, step-by-step cryptography.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -87,7 +87,7 @@ function SmartRoutePage() {
   const [start, setStart] = useState("Manila");
   const [goal, setGoal] = useState("Legazpi");
   const [method, setMethod] = useState<CryptoMethod>("rsa");
-  const [message, setMessage] = useState("Meet me in Legazpi at dawn. Bring the maps. — M");
+  const [message, setMessage] = useState("Meet me in Legazpi at dawn. Bring the maps.");
   const [speed, setSpeed] = useState<Speed>("normal");
 
   /* ----- run state ----- */
