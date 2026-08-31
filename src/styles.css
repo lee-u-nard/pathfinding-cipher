@@ -1,0 +1,182 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * SmartRoute design system — dark "network operations" console.
+ * Amber = pathfinding, teal = cryptography, deep slate surfaces.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-route: var(--route);
+  --color-route-foreground: var(--route-foreground);
+  --color-crypto: var(--crypto);
+  --color-crypto-foreground: var(--crypto-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.17 0.015 255);
+  --foreground: oklch(0.93 0.01 250);
+  --card: oklch(0.21 0.018 255);
+  --card-foreground: oklch(0.93 0.01 250);
+  --popover: oklch(0.21 0.018 255);
+  --popover-foreground: oklch(0.93 0.01 250);
+  --primary: oklch(0.79 0.155 78);
+  --primary-foreground: oklch(0.2 0.03 80);
+  --secondary: oklch(0.27 0.02 255);
+  --secondary-foreground: oklch(0.9 0.01 250);
+  --muted: oklch(0.26 0.02 255);
+  --muted-foreground: oklch(0.65 0.02 250);
+  --accent: oklch(0.27 0.02 255);
+  --accent-foreground: oklch(0.93 0.01 250);
+  --destructive: oklch(0.65 0.2 25);
+  --destructive-foreground: oklch(0.97 0.01 250);
+  --border: oklch(0.3 0.02 255);
+  --input: oklch(0.32 0.02 255);
+  --ring: oklch(0.79 0.155 78);
+  --route: oklch(0.79 0.155 78);
+  --route-foreground: oklch(0.2 0.03 80);
+  --crypto: oklch(0.78 0.12 195);
+  --crypto-foreground: oklch(0.18 0.03 220);
+  --chart-1: oklch(0.79 0.155 78);
+  --chart-2: oklch(0.78 0.12 195);
+  --chart-3: oklch(0.65 0.2 25);
+  --chart-4: oklch(0.7 0.15 150);
+  --chart-5: oklch(0.68 0.16 310);
+  --sidebar: oklch(0.21 0.018 255);
+  --sidebar-foreground: oklch(0.93 0.01 250);
+  --sidebar-primary: oklch(0.79 0.155 78);
+  --sidebar-primary-foreground: oklch(0.2 0.03 80);
+  --sidebar-accent: oklch(0.27 0.02 255);
+  --sidebar-accent-foreground: oklch(0.93 0.01 250);
+  --sidebar-border: oklch(0.3 0.02 255);
+  --sidebar-ring: oklch(0.79 0.155 78);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  /* Panel header eyebrow label */
+  .panel-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+  }
+
+  /* Live log pane */
+  .log-pane {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  /* Leaflet chrome blending into the dark console */
+  .leaflet-container {
+    background: oklch(0.14 0.015 255);
+    font-family: var(--font-sans);
+  }
+
+  .leaflet-tile {
+    filter: saturate(0.55) brightness(0.9) contrast(1.05);
+  }
+
+  .leaflet-control-zoom a {
+    background: var(--color-card) !important;
+    color: var(--color-foreground) !important;
+    border-color: var(--color-border) !important;
+  }
+
+  .leaflet-control-attribution {
+    background: oklch(0.17 0.015 255 / 0.75) !important;
+    color: var(--color-muted-foreground) !important;
+    font-size: 0.6rem;
+  }
+
+  .leaflet-control-attribution a {
+    color: var(--color-muted-foreground) !important;
+  }
+
+  .city-tooltip {
+    background: var(--color-popover);
+    color: var(--color-popover-foreground);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  .city-tooltip::before {
+    display: none;
+  }
+}
+
+/* Pulsing ring for the city currently being expanded */
+@keyframes node-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
