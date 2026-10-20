@@ -19,7 +19,7 @@ export interface CryptoRun {
   /** Key/value artifacts shown after the run. */
   artifacts: { label: string; value: string }[];
   /** Runs the reverse operation, returning steps + verification outcome. */
-  reverse: () => Promise<ReverseResult>;
+  reverse: (currentMessage?: string) => Promise<ReverseResult>;
   reverseLabel: string;
 }
 
@@ -314,14 +314,15 @@ async function runHash(message: string): Promise<CryptoRun> {
     encSteps: steps,
     artifacts,
     reverseLabel: "Verify integrity",
-    reverse: async () => {
+    reverse: async (currentMessage = message) => {
       const rsteps: string[] = [];
-      const current = (document.querySelector<HTMLTextAreaElement>("#sr-message")?.value ?? message);
       rsteps.push("Re-hashing the current message box contents with SHA-256");
-      const again = bytesToHex(await crypto.subtle.digest("SHA-256", enc.encode(current)));
+      const again = bytesToHex(await crypto.subtle.digest("SHA-256", enc.encode(currentMessage)));
       const ok = again === hex;
       rsteps.push(`Fresh digest = ${again}`);
-      rsteps.push(ok ? "Digests match — message unchanged ✓" : "Digests differ — message was modified ✗");
+      rsteps.push(
+        ok ? "Digests match — message unchanged ✓" : "Digests differ — message was modified ✗",
+      );
       return {
         steps: rsteps,
         revealed: again,

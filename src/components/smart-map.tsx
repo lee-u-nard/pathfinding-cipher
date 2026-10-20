@@ -41,6 +41,32 @@ function useZoom(): number {
   return zoom;
 }
 
+/** Keep Leaflet's cached dimensions in sync with its responsive grid cell. */
+function InvalidateMapSize() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    let fittedInitialBounds = false;
+    const syncSize = () => {
+      map.invalidateSize({ pan: false });
+      if (!fittedInitialBounds && container.clientWidth > 0 && container.clientHeight > 0) {
+        map.fitBounds(BOUNDS, { padding: [20, 20] });
+        fittedInitialBounds = true;
+      }
+    };
+    const observer = new ResizeObserver(syncSize);
+    observer.observe(container.parentElement ?? container);
+    const frame = requestAnimationFrame(syncSize);
+    window.addEventListener("resize", syncSize);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", syncSize);
+    };
+  }, [map]);
+  return null;
+}
+
 /** Everything that needs the live map instance (zoom) lives inside the container. */
 function MapContent({ start, goal, expanded, current, path }: SmartMapProps) {
   const zoom = useZoom();
@@ -139,10 +165,11 @@ export default function SmartMap(props: SmartMapProps) {
     <MapContainer
       bounds={BOUNDS}
       scrollWheelZoom
-      minZoom={5}
+      minZoom={4}
       className="h-full w-full"
       style={{ height: "100%", width: "100%" }}
     >
+      <InvalidateMapSize />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"

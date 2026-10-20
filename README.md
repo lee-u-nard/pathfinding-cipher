@@ -169,3 +169,45 @@ empty or waiting on a run to appear.
 
 Add a collapsible "Advanced" section
 
+## Complexity Analysis
+
+The bounds describe these implementations, not optimized textbook variants.
+V is the number of cities, E the number of directed adjacency entries, K = 5
+the nearest-neighbor setting, n the UTF-8 message length in bytes, m the
+pattern length in UTF-16 code units, σ ≤ 256 the number of distinct bytes,
+and L ≤ max(1, σ − 1) the maximum Huffman code length. For RSA, b is the
+modulus bit length, k the Miller–Rabin round count, M(b) the cost of a b-bit
+modular multiplication, and t = ceil(n / B) for block size B ≈ b / 8 bytes.
+The searches sort an array on every removal and may enqueue multiple entries
+for a city; they do not use a priority queue. Space includes produced output
+unless otherwise stated.
+
+| Algorithm | Time | Space (including output) | Notes |
+| --- | --- | --- | --- |
+| `haversineKm` | O(1) | O(1) | Fixed number of arithmetic/trigonometric operations per city pair. |
+| `buildEdges` | O(V² log V + V⁴) conservative worst case | O(V + E) | K-nearest sorts V lists of V cities. Up to V bridge passes scan all city pairs; union-find has path compression but no rank, so a `find` can cost O(V). For fixed K, E = O(V). |
+| Dijkstra | O(E² log E + V) worst case | O(V + E) | Array sorting dominates; includes up to O(E) queue entries. |
+| A* | O(E² log E + V) worst case | O(V + E) | Same queue implementation; the heuristic can reduce work in practice. |
+| Greedy Best-First | O(E² log E + V) worst case | O(V + E) | Same queue implementation; it does not guarantee a shortest path. |
+| Floyd–Warshall | O(V³ + E) | O(V²) | Stores distance and next-hop matrices. |
+| KMP | O(x + m) | O(m + z) | x and m are text and pattern lengths in UTF-16 code units; z is the number of matches. Comparisons include prefix-table construction. |
+| Brute force | O(xm) | O(z) | Reports overlapping matches; x is the text length in UTF-16 code units. |
+| Huffman `compress` / `decompress` | O(nL + σ² log σ) | O(nL + σL) | Packed output and code strings are included. Tree construction repeatedly sorts a list; decoding traverses encoded bits. |
+| RLE `rleCompress` | O(n) | O(n) | Scans UTF-8 bytes into count-and-symbol records, splitting runs at 255 or 65535; includes the returned buffer. |
+| RLE `rleDecompress` | O(n + c) | O(n) | n is original UTF-8 length and c is compressed length; validates records and fills the decoded buffer. |
+| Compression optimizer | O(nL + σ² log σ) | O(nL + σL) | Measures complete Huffman and two RLE encodings 10 times each, then scores three candidates in O(3) using normalized size and time with a configurable weight; chooses one. Constants include 30 encode runs. |
+| `modPow` | O(b M(b)) | O(b), excluding multiplication workspace | Square-and-multiply for an exponent of at most b bits; for RSA public exponent e, use O(log e · M(b)). |
+| Miller–Rabin | O(k b M(b)) | O(b), excluding multiplication workspace | k rounds on a b-bit candidate; extra squarings are within the same bound. |
+| RSA `randomPrime` / key generation | Expected O(k b² M(b)) | O(b), excluding multiplication workspace | About O(b) random odd b/2-bit candidates per prime; each may run Miller–Rabin. This is an expectation, not a finite worst-case bound. GCD and modular inverse add big-integer arithmetic. |
+| RSA encryption in `runRsa` | O(n + t log e · M(b)) | O(n + tb) bits | UTF-8 block encoding plus one `modPow(m, e, n)` per block; e is typically 65537 here. |
+| RSA decryption in `runRsa.reverse` | O(n + t b M(b)) | O(n + tb) bits | One `modPow(c, d, n)` per block, followed by byte reassembly. |
+| AES-GCM `runAes` / `reverse` | O(n) | O(n) | Web Crypto key size, IV and authentication tag are fixed; each call processes the message once and retains input/output buffers. |
+| SHA-256 `runHash` / `reverse` | O(n) | O(n) | Web Crypto digest is linear in message bytes; TextEncoder creates an O(n) buffer. Re-verification hashes the current field again. |
+
+Compressed sizes include the Huffman frequency header or RLE header and run
+records. The displayed ratio is compressed bytes divided by original UTF-8
+bytes; it can exceed 100% for small inputs and is undefined for empty input.
+The optimizer selects one actual encoding and displays all candidate sizes,
+ratios, measured encode times, and normalized weighted scores. Timings vary
+by device and run.
+

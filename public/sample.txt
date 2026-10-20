@@ -1,0 +1,3 @@
+Algorithms find patterns in text. A pattern can repeat: pattern, pattern, pattern.
+The shortest path connects cities, while compression makes repeated text smaller.
+Practice makes patterns easier to see.
