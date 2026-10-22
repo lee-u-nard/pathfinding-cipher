@@ -1,179 +1,157 @@
-
-mwuah
-
-# Route & Cipher Explorer
-
-Build "SmartRoute" as a single-page React + TypeScript + Tailwind
-
-(shadcn/ui) web app. This is a client-side algorithm and cryptography
-
-visualizer — do NOT add authentication, a database, or Supabase; nothing
-
-needs to be saved between sessions, all computation happens in the
-
-browser.
-
-## Overall layout (one page, no tabs, three-zone layout)
-
-- CENTER: a large, real interactive map using react-leaflet with
-
-  OpenStreetMap tiles (pannable/zoomable, not a static image or an
-
-  abstract chart). This is the visual anchor — give it the most space.
-
-- LEFT panel: "Pathfinding" controls.
-
-- RIGHT panel: "Cryptography" controls.
-
-- BOTTOM, full width, centered: a multi-line text input for the message
-
-  to encrypt, and a single centered "Run" button below it.
-
-- Stack into a single vertical column on narrow/mobile widths, with the
-
-  map always on top when stacked.
-
-## Map data
-
-Nationwide dataset: 50 cities / provincial capitals across Luzon,
-
-Visayas, and Mindanao (full list in `src/lib/graph.ts`, grouped by
-
-island group), plotted as markers on the map.
-
-Edges are NOT hand-listed — the graph is generated at load time:
-
-- Each city connects to its K nearest neighbors by great-circle
-
-  (haversine) distance in km (K = 5, exposed as `K_NEAREST`).
-
-- A union-find connectivity pass then finds disconnected components
-
-  (island clusters) and adds the single minimum-distance edge between
-
-  components until the graph is fully connected — so every route query
-
-  between any two cities has an answer, even Luzon-to-Mindanao.
-
-- Each edge is labeled "road" when both endpoints share an island group
-
-  and are under 150 km apart, and "sea/air route" otherwise. Sea/air
-
-  edges are drawn dashed on the map and called out in the pathfinding
-
-  log (e.g. "Crossing to CebuCity via sea/air route — 320 km leg").
-
-All edge weights are haversine distances in km, computed in TypeScript
-
-at load time — no hardcoded distances.
-
-On page load, before any run: show all city markers and edges on the
-
-map immediately, fitted to the whole Philippines, so the map is never
-
-empty or waiting on a run to appear.
-
-## LEFT panel — Pathfinding
-
-- Dropdown: algorithm — A*, Dijkstra, Greedy Best-First, Floyd-Warshall.
-
-- Dropdown: start city, Dropdown: destination city.
-
-- Implement all four as real TypeScript functions operating on the
-
-  graph (not simulated/faked), each returning: the final path, total
-
-  distance, an ORDERED array of expanded nodes (for animation), and
-
-  elapsed computation time. A* and Greedy Best-First use the haversine
-
-  distance to the goal as their heuristic.
-
-- A live scrolling log area under the dropdowns that fills in one line
-
-  per expansion step during the run, e.g. "Expanding Tarlac — 142.3 km
-
-  so far."
-
-- After the run: show distance, nodes expanded, and time as metric
-
-  cards.
-
-## RIGHT panel — Cryptography
-
-- Dropdown: method — RSA, AES, Hash-only.
-
-- Implement in TypeScript using the browser's native Web Crypto API
-
-  (crypto.subtle) for AES-GCM and SHA-256. For RSA, hand-implement small
-
-  demo-scale keys (e.g. 256-bit primes via a Miller-Rabin primality
-
-  test) so the math (p, q, n, phi(n), e, d) is visibly generated and
-
-  shown on screen, not hidden in a library — this is intentionally
-
-  undersized for teaching purposes, not production security.
-
-- A live log area showing each method's real intermediate steps as they
-
-  happen: RSA (generating prime p -> generating prime q -> computing n
-
-  -> computing phi(n) -> choosing e -> computing d -> encrypting a
-
-  numeric fingerprint of the message), AES (generating a key -> showing
-
-  plaintext -> encrypting), Hash-only (showing plaintext -> hashing ->
-
-  revealing the digest).
-
-- After encryption finishes, reveal the resulting keys/ciphertext/
-
-  digest, and show a "Decrypt" button (RSA/AES) or "Verify integrity"
-
-  button (Hash-only, since there's nothing to decrypt). Clicking it
-
-  animates the reverse steps and reveals the original text, with a
-
-  visible match/mismatch confirmation.
-
-## Bottom bar and the Run button
-
-- Text area: "Message to encrypt" — arbitrary user text, this is what
-
-  the cryptography panel actually encrypts (not the route).
-
-- "Animation speed" control (Slow/Normal/Fast) and a "Skip to result"
-
-  option.
-
-- Clicking Run starts ONE interleaved animation loop (e.g. driven by
-
-  requestAnimationFrame or a fixed-interval timer) that, on each tick:
-
-    a) reveals the next expanded city as a highlighted marker on the
-
-       map, in real time, and appends the matching line to the left log
-
-    b) advances the crypto method to its next step and appends the
-
-       matching line to the right log
-
-  so both sides visibly progress together, not one finishing before the
-
-  other starts. When the pathfinding animation finishes, draw the final
-
-  shortest path as a highlighted line over the map.
-
-## Extra: algorithm comparison
-
-Add a collapsible "Advanced" section
+# Pathfinding Cipher
+
+A React/TypeScript teaching app with a local Philippines province map and a
+Bohol road-network view, alongside RSA, AES-GCM, SHA-256, live KMP/brute-force
+matching, Huffman/RLE compression and a weighted compression optimizer.
+
+## Run
+
+Use Node.js 22.18+ (or Node 24) and npm:
+
+```sh
+npm install
+npm run build:data
+npm run dev
+```
+
+For production, run `npm run build`. Type-check with `npx tsc --noEmit`.
+Generated graph JSON is bundled at build time: restart Vite after generating
+it, and regenerate the production build before deploying changed data.
+
+## Map and controls
+
+The default view shows simplified province/district boundaries. Hover Bohol
+and click it (or use **Explore Bohol**) to fit its bounds and reveal its road
+network. **Back to Philippines** restores the country view. Other provinces
+are display-only; `PROVINCE_DATASETS` in `src/lib/graph.ts` is the registry
+for adding future datasets. The searchable town pickers contain only the
+47 road-connected Bohol nodes and are enabled in the Bohol view. President Carlos
+P. Garcia is shown separately as road-inaccessible and excluded from route choices,
+as agreed: its island has a sea connection, not a road bridge to mainland Bohol.
+
+The middle column scrolls as a unit, including the map; both desktop sidebars
+scroll independently. The map retains its 55vh/55dvh height and minimum of
+360px/400px. Wheel input scrolls the column until the map is clicked or focused;
+leaving the map or clicking outside locks wheel zoom again. Dragging and +/-
+buttons always work. ResizeObserver keeps Leaflet dimensions up to date.
+
+Road edges and animations use stored road polylines. A*/Greedy use haversine
+between town centers; Dijkstra uses road length. All road weights are at least
+the endpoint haversine distance, so the A* heuristic is consistent and
+admissible. Floyd-Warshall animates intermediate-vertex passes (not traversal
+edges); all algorithms trace the final route along its actual stored geometry.
+The comparison table stays visible below the map. During a run, province
+navigation is disabled to keep the animation and selected graph consistent.
+
+Crypto and Text Lab work even if road data is absent or the country view is
+selected. Sample loading and manual typing still share the same message field.
+
+## Reproducible offline data pipeline
+
+`npm run build:data` runs `scripts/build-bohol-graph.mjs`. Network requests
+occur **only in this script**. The application uses bundled road JSON and
+same-origin province JSON; it does not request external map tiles or routing APIs.
+
+1. Download the public [faeldon Philippines JSON maps](https://github.com/faeldon/philippines-json-maps)
+   2023 province/district boundaries from each region. Resolve the source Git
+   tree once, pin raw downloads to that commit, simplify with Douglas-Peucker
+   tolerance 0.005 degrees, retain Bohol and source names, and copy the MIT license.
+   An explicitly unassigned source feature is omitted and reported.
+2. Query [OpenStreetMap through Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API)
+   for Bohol municipality relations, place nodes and road bridges. **Philippine
+   municipalities/cities use admin_level=6**, not 8; both are queried, with
+   level-8 results accepted only if explicitly tagged municipality/city. See
+   the [OSM Philippines convention](https://wiki.openstreetmap.org/wiki/Philippines/Mapping_conventions/Local_government).
+   Require 48 complete boundaries, including Tagbilaran City and Panglao. The
+   downloaded OSM data has only 14 municipal polygons, so the builder falls back
+   to the same public PSGC repository's complete Bohol municipal boundary file.
+   This fallback is recorded in the metadata/report; all 48 centers remain OSM nodes.
+3. Use each relation's town/city `admin_centre` place node, or a uniquely named
+   town/city place node inside its boundary. Coordinates are preserved exactly
+   as mapped in OSM; polygon centroids and hand-entered locations are never used.
+   OSM accuracy is not a surveying guarantee. Unlinked offshore barangays are
+   not separate graph nodes.
+4. Candidate pairs share a boundary way or have touching/intersecting polygons
+   (the public PSGC topology has small overlaps along shared boundaries). OSM road bridges
+   also qualify a pair when boundaries stop at coastlines, covering bridge-linked
+   islands without inventing sea connections. Bridge endpoints are classified
+   using OSM municipal polygons where available, since the PSGC land polygons
+   stop at the coast. This finds the Butalid Causeway between Tagbilaran and Dauis.
+5. Request full driving route geometries from the [OSRM demo service](https://project-osrm.org/docs/v5.24.0/api/),
+   rejecting any returned route with ferry steps (the demo server does not support
+   the ferry exclusion flag). Try returned alternatives; reject routes spending more than
+   100 m in a third municipality. Territory checks sample segments at <=50 m;
+   the 100 m allowance handles boundary slivers and is an explicit approximation.
+6. Preserve exact OSM center markers and the actual OSRM road endpoints. As agreed,
+   connect them with separately styled **dashed approximate access segments**;
+   they are not claimed to be surveyed road geometry. The largest downloaded
+   center-to-road gap is 62.4 m; reject new gaps above 150 m for manual review.
+   Keep the OSRM-reported distance and snap offsets as provenance. The algorithm
+   weight is the haversine sum along the stored road plus both access connectors.
+   Simplify at about 2 m tolerance, reducing it until length loss is <=0.1%.
+7. Store each undirected edge once. Check 48 centers (47 road nodes plus Carlos P. Garcia), required towns, endpoints,
+   distance >= straight-line, and connectivity of the 47 road nodes. Print node/edge counts, average
+   degree, disconnected components, rejected pairs and suspicious detours.
+   Never repair connectivity with invented straight lines or ferry edges.
+   Failed validation stops publication of the graph. The runtime independently
+   validates the schema, unique pairs, endpoints, weights and connectivity.
+
+Outputs:
+
+- `public/data/ph-provinces.geo.json`: simplified local map background.
+- `public/data/province-source-LICENSE.txt`: boundary source license.
+- `src/data/bohol-graph.json`: nodes, undirected road polylines, source metadata,
+  weights, original OSRM distances and endpoint snap distances.
+- `public/data/bohol-build-report.json`: components, counts, warnings and rejected routes.
+- `.cache/bohol-data/`: ignored raw-response cache, keyed by request URL.
+
+Requests run serially, spaced at least 1.1 seconds apart, with three attempts,
+exponential backoff and a 180-second timeout per request. Cached successful
+responses make reruns fast; failed HTTP responses are not cached. Keep the cache
+for identical inputs; move it aside when deliberately refreshing OSM data.
+`OVERPASS_URL` can select another Overpass interpreter; `OSRM_URL` can select
+another compatible driving router. For example in PowerShell:
+
+```powershell
+$env:OVERPASS_URL = 'https://overpass.kumi.systems/api/interpreter'
+npm run build:data
+```
+
+To generate only the province background: `npm run build:data -- --provinces-only`.
+If downloads fail, run `npm run build:data` on a machine with access to those
+servers, then restart/rebuild. The app gives this instruction when files are
+missing; it never substitutes a made-up graph. If validation reports disconnected
+towns, inspect the named rejected pairs and original OSM/OSRM responses, correct
+source mapping or use a current routing dataset, and rerun. A failed rebuild
+leaves any previously validated graph in place; its generatedAt records its age.
+
+Run `npm run test:graph` to check malformed-data rejection, connectivity,
+heuristic consistency, valid path edges and agreement between A*, Dijkstra and
+Floyd-Warshall on both fixtures and the generated dataset. All source downloads
+needed for this snapshot succeeded. Of 108 candidate pairs, 31 were excluded
+because returned routes traversed a third municipality (or used a ferry).
+No accepted edge triggered the >3× straight-line detour warning. The report
+records all rejected pairs and approximate access offsets; routes have not been
+surveyed on the ground. Undirected edges intentionally ignore direction-specific
+driving restrictions for this teaching simulation.
+
+<!-- graph-counts:start -->
+
+Validated graph: V = 47, E = 77 undirected roads (154 adjacency entries). All 48 town centers are shown; President Carlos P. Garcia is road-inaccessible.
+<!-- graph-counts:end -->
+
+Map data: **© OpenStreetMap contributors**, available under the
+[Open Database License](https://www.openstreetmap.org/copyright).
+Province boundaries: faeldon/philippines-json-maps (MIT), derived from the
+Philippines PSGC shapefile project. These are educational boundary snapshots,
+not an authoritative/current legal boundary service.
 
 ## Complexity Analysis
 
 The bounds describe these implementations, not optimized textbook variants.
-V is the number of cities, E the number of directed adjacency entries, K = 5
-the nearest-neighbor setting, n the UTF-8 message length in bytes, m the
+V = 47 routable town centers; E counts undirected roads (2E adjacency entries).
+The current validated snapshot has E = 77, hence 154 adjacency entries.
+P is the number of stored polyline vertices. n is the UTF-8 message length in bytes, m the
 pattern length in UTF-16 code units, σ ≤ 256 the number of distinct bytes,
 and L ≤ max(1, σ − 1) the maximum Huffman code length. For RSA, b is the
 modulus bit length, k the Miller–Rabin round count, M(b) the cost of a b-bit
@@ -182,27 +160,27 @@ The searches sort an array on every removal and may enqueue multiple entries
 for a city; they do not use a priority queue. Space includes produced output
 unless otherwise stated.
 
-| Algorithm | Time | Space (including output) | Notes |
-| --- | --- | --- | --- |
-| `haversineKm` | O(1) | O(1) | Fixed number of arithmetic/trigonometric operations per city pair. |
-| `buildEdges` | O(V² log V + V⁴) conservative worst case | O(V + E) | K-nearest sorts V lists of V cities. Up to V bridge passes scan all city pairs; union-find has path compression but no rank, so a `find` can cost O(V). For fixed K, E = O(V). |
-| Dijkstra | O(E² log E + V) worst case | O(V + E) | Array sorting dominates; includes up to O(E) queue entries. |
-| A* | O(E² log E + V) worst case | O(V + E) | Same queue implementation; the heuristic can reduce work in practice. |
-| Greedy Best-First | O(E² log E + V) worst case | O(V + E) | Same queue implementation; it does not guarantee a shortest path. |
-| Floyd–Warshall | O(V³ + E) | O(V²) | Stores distance and next-hop matrices. |
-| KMP | O(x + m) | O(m + z) | x and m are text and pattern lengths in UTF-16 code units; z is the number of matches. Comparisons include prefix-table construction. |
-| Brute force | O(xm) | O(z) | Reports overlapping matches; x is the text length in UTF-16 code units. |
-| Huffman `compress` / `decompress` | O(nL + σ² log σ) | O(nL + σL) | Packed output and code strings are included. Tree construction repeatedly sorts a list; decoding traverses encoded bits. |
-| RLE `rleCompress` | O(n) | O(n) | Scans UTF-8 bytes into count-and-symbol records, splitting runs at 255 or 65535; includes the returned buffer. |
-| RLE `rleDecompress` | O(n + c) | O(n) | n is original UTF-8 length and c is compressed length; validates records and fills the decoded buffer. |
-| Compression optimizer | O(nL + σ² log σ) | O(nL + σL) | Measures complete Huffman and two RLE encodings 10 times each, then scores three candidates in O(3) using normalized size and time with a configurable weight; chooses one. Constants include 30 encode runs. |
-| `modPow` | O(b M(b)) | O(b), excluding multiplication workspace | Square-and-multiply for an exponent of at most b bits; for RSA public exponent e, use O(log e · M(b)). |
-| Miller–Rabin | O(k b M(b)) | O(b), excluding multiplication workspace | k rounds on a b-bit candidate; extra squarings are within the same bound. |
-| RSA `randomPrime` / key generation | Expected O(k b² M(b)) | O(b), excluding multiplication workspace | About O(b) random odd b/2-bit candidates per prime; each may run Miller–Rabin. This is an expectation, not a finite worst-case bound. GCD and modular inverse add big-integer arithmetic. |
-| RSA encryption in `runRsa` | O(n + t log e · M(b)) | O(n + tb) bits | UTF-8 block encoding plus one `modPow(m, e, n)` per block; e is typically 65537 here. |
-| RSA decryption in `runRsa.reverse` | O(n + t b M(b)) | O(n + tb) bits | One `modPow(c, d, n)` per block, followed by byte reassembly. |
-| AES-GCM `runAes` / `reverse` | O(n) | O(n) | Web Crypto key size, IV and authentication tag are fixed; each call processes the message once and retains input/output buffers. |
-| SHA-256 `runHash` / `reverse` | O(n) | O(n) | Web Crypto digest is linear in message bytes; TextEncoder creates an O(n) buffer. Re-verification hashes the current field again. |
+| Algorithm                                | Time                       | Space (including output)                 | Notes                                                                                                                                                                                                         |
+| ---------------------------------------- | -------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `haversineKm`                            | O(1)                       | O(1)                                     | Fixed number of arithmetic/trigonometric operations per city pair.                                                                                                                                            |
+| Graph loading / validation (`loadGraph`) | O(V + E + P)               | O(V + E + P)                             | Parses static JSON, checks geometry lengths/endpoints, builds adjacency and checks connectivity. The old nearest-neighbor `buildEdges` has been removed.                                                      |
+| Dijkstra                                 | O(E² log E + V) worst case | O(V + E)                                 | Array sorting dominates; includes up to O(E) queue entries.                                                                                                                                                   |
+| A*                                       | O(E² log E + V) worst case | O(V + E)                                 | Same queue implementation; the heuristic can reduce work in practice.                                                                                                                                         |
+| Greedy Best-First                        | O(E² log E + V) worst case | O(V + E)                                 | Same queue implementation; it does not guarantee a shortest path.                                                                                                                                             |
+| Floyd–Warshall                           | O(V³ + E)                  | O(V²)                                    | Stores distance and next-hop matrices.                                                                                                                                                                        |
+| KMP                                      | O(x + m)                   | O(m + z)                                 | x and m are text and pattern lengths in UTF-16 code units; z is the number of matches. Comparisons include prefix-table construction.                                                                         |
+| Brute force                              | O(xm)                      | O(z)                                     | Reports overlapping matches; x is the text length in UTF-16 code units.                                                                                                                                       |
+| Huffman `compress` / `decompress`        | O(nL + σ² log σ)           | O(nL + σL)                               | Packed output and code strings are included. Tree construction repeatedly sorts a list; decoding traverses encoded bits.                                                                                      |
+| RLE `rleCompress`                        | O(n)                       | O(n)                                     | Scans UTF-8 bytes into count-and-symbol records, splitting runs at 255 or 65535; includes the returned buffer.                                                                                                |
+| RLE `rleDecompress`                      | O(n + c)                   | O(n)                                     | n is original UTF-8 length and c is compressed length; validates records and fills the decoded buffer.                                                                                                        |
+| Compression optimizer                    | O(nL + σ² log σ)           | O(nL + σL)                               | Measures complete Huffman and two RLE encodings 10 times each, then scores three candidates in O(3) using normalized size and time with a configurable weight; chooses one. Constants include 30 encode runs. |
+| `modPow`                                 | O(b M(b))                  | O(b), excluding multiplication workspace | Square-and-multiply for an exponent of at most b bits; for RSA public exponent e, use O(log e · M(b)).                                                                                                        |
+| Miller–Rabin                             | O(k b M(b))                | O(b), excluding multiplication workspace | k rounds on a b-bit candidate; extra squarings are within the same bound.                                                                                                                                     |
+| RSA `randomPrime` / key generation       | Expected O(k b² M(b))      | O(b), excluding multiplication workspace | About O(b) random odd b/2-bit candidates per prime; each may run Miller–Rabin. This is an expectation, not a finite worst-case bound. GCD and modular inverse add big-integer arithmetic.                     |
+| RSA encryption in `runRsa`               | O(n + t log e · M(b))      | O(n + tb) bits                           | UTF-8 block encoding plus one `modPow(m, e, n)` per block; e is typically 65537 here.                                                                                                                         |
+| RSA decryption in `runRsa.reverse`       | O(n + t b M(b))            | O(n + tb) bits                           | One `modPow(c, d, n)` per block, followed by byte reassembly.                                                                                                                                                 |
+| AES-GCM `runAes` / `reverse`             | O(n)                       | O(n)                                     | Web Crypto key size, IV and authentication tag are fixed; each call processes the message once and retains input/output buffers.                                                                              |
+| SHA-256 `runHash` / `reverse`            | O(n)                       | O(n)                                     | Web Crypto digest is linear in message bytes; TextEncoder creates an O(n) buffer. Re-verification hashes the current field again.                                                                             |
 
 Compressed sizes include the Huffman frequency header or RLE header and run
 records. The displayed ratio is compressed bytes divided by original UTF-8
@@ -211,3 +189,9 @@ The optimizer selects one actual encoding and displays all candidate sizes,
 ratios, measured encode times, and normalized weighted scores. Timings vary
 by device and run.
 
+Offline generation has additional geometry costs. With at most B boundary
+segments per municipality, testing all pairs is conservatively O(V²B²).
+If R route samples are examined, territory classification is O(RVB), and
+Douglas-Peucker simplification is O(P²) worst case. Stored geometry and cached
+responses occupy O(VB + P + R) space; external service latency is outside these
+CPU bounds. Runtime algorithms use the generated adjacency list, not this pipeline.

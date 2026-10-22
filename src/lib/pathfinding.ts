@@ -16,7 +16,7 @@ export interface Expansion {
   note?: string;
   /**
    * Edge this node was reached through (absent for the start node and for
-   * Floyd-Warshall passes). `kind` lets the UI call out sea/air crossings.
+   * Floyd-Warshall passes). Used to animate the actual road geometry.
    */
   via?: { from: string; kind: EdgeKind; km: number };
 }
@@ -55,17 +55,13 @@ function pathDistance(path: string[]): number {
 }
 
 /** Shared best-first search. mode: "dijkstra" uses g, "astar" g+h, "greedy" h only. */
-function bestFirst(
-  start: string,
-  goal: string,
-  mode: "dijkstra" | "astar" | "greedy",
-): PathResult {
+function bestFirst(start: string, goal: string, mode: "dijkstra" | "astar" | "greedy"): PathResult {
   const t0 = performance.now();
   const gScore = new Map<string, number>([[start, 0]]);
   const cameFrom = new Map<string, string>();
   const closed = new Set<string>();
   const expanded: Expansion[] = [];
-  // Simple open list (10 nodes — a sorted array is plenty).
+  // A sorted-array open list for the 47-town road graph.
   const open: { node: string; f: number }[] = [{ node: start, f: 0 }];
 
   while (open.length > 0) {
@@ -83,7 +79,7 @@ function bestFirst(
     });
     if (node === goal) break;
 
-    for (const { to, w } of (GRAPH[node] ?? [])) {
+    for (const { to, w } of GRAPH[node] ?? []) {
       if (closed.has(to)) continue;
       const tentative = g + w;
       if (tentative < (gScore.get(to) ?? Infinity)) {
@@ -121,7 +117,7 @@ function floydWarshall(start: string, goal: string): PathResult {
     }
   }
   for (const u of nodes) {
-    for (const { to, w } of (GRAPH[u] ?? [])) {
+    for (const { to, w } of GRAPH[u] ?? []) {
       dist.get(u)!.set(to, w);
       next.get(u)!.set(to, to);
     }
@@ -168,6 +164,9 @@ function floydWarshall(start: string, goal: string): PathResult {
 }
 
 export function runAlgorithm(algo: AlgoName, start: string, goal: string): PathResult {
+  if (!cityByName.has(start) || !cityByName.has(goal)) {
+    throw new Error("Select two towns from the loaded Bohol graph before running pathfinding.");
+  }
   switch (algo) {
     case "dijkstra":
       return bestFirst(start, goal, "dijkstra");

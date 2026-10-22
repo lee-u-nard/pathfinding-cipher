@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Play, FastForward, ShieldCheck, RouteIcon, RotateCcw } from "lucide-react";
 
-import { CITIES } from "@/lib/graph";
+import { CITIES, EDGES, GRAPH_ERROR, type MapView } from "@/lib/graph";
 import {
   ALGO_LABELS,
   compareAll,
@@ -78,10 +78,16 @@ function SmartRoutePage() {
 
   /* ----- controls ----- */
   const [algo, setAlgo] = useState<AlgoName>("astar");
-  const [start, setStart] = useState("Manila");
-  const [goal, setGoal] = useState("Legazpi");
+  const [mapView, setMapView] = useState<MapView>("philippines");
+  const [start, setStart] = useState(
+    CITIES.find((c) => c.name.includes("Tagbilaran"))?.name ?? CITIES[0]?.name ?? "",
+  );
+  const [goal, setGoal] = useState(
+    CITIES.find((c) => c.name === "Panglao")?.name ?? CITIES.at(-1)?.name ?? "",
+  );
+  const graphReady = mapView === "bohol" && !GRAPH_ERROR;
   const [method, setMethod] = useState<CryptoMethod>("rsa");
-  const [message, setMessage] = useState("Meet me in Legazpi at dawn. Bring the maps.");
+  const [message, setMessage] = useState("Meet me in Bohol at dawn. Bring the maps.");
   const [speed, setSpeed] = useState<Speed>("normal");
   const [pattern, setPattern] = useState("pattern");
   const [sampleError, setSampleError] = useState("");
@@ -107,6 +113,10 @@ function SmartRoutePage() {
   const [cryptoRun, setCryptoRun] = useState<CryptoRun | null>(null);
   const [expCount, setExpCount] = useState(0);
   const [stepCount, setStepCount] = useState(0);
+  useEffect(() => {
+    setPathResult(null);
+    setExpCount(0);
+  }, [algo, start, goal]);
 
   /* ----- decrypt / verify state ----- */
   const [revPhase, setRevPhase] = useState<Phase>("idle");
@@ -119,8 +129,8 @@ function SmartRoutePage() {
   /* ----- advanced comparison ----- */
   // Timings vary between server and browser renders, so calculate them after hydration.
   const comparison = useMemo(
-    () => (mounted ? compareAll(start, goal) : null),
-    [mounted, start, goal],
+    () => (mounted && graphReady ? compareAll(start, goal) : null),
+    [mounted, graphReady, start, goal],
   );
 
   const expansions = pathResult?.expanded ?? [];
@@ -140,7 +150,7 @@ function SmartRoutePage() {
   }, [running, speed, expansions.length, encSteps.length]);
 
   useEffect(() => {
-    if (running && pathResult && cryptoRun && expDone && cryptoDone) setPhase("done");
+    if (running && cryptoRun && expDone && cryptoDone) setPhase("done");
   }, [running, pathResult, cryptoRun, expDone, cryptoDone]);
 
   /* ----- reverse animation loop (decrypt / verify) ----- */
@@ -168,11 +178,21 @@ function SmartRoutePage() {
     setRevShown(0);
     setVerdict(null);
     setCryptoRun(null);
-    const pr = runAlgorithm(algo, start, goal);
+    const pr = graphReady ? runAlgorithm(algo, start, goal) : null;
     setPathResult(pr);
     const cr = await runCrypto(method, message);
     setCryptoRun(cr);
-  }, [running, algo, start, goal, method, message]);
+  }, [running, algo, start, goal, method, message, graphReady]);
+
+  const changeMapView = useCallback(
+    (view: MapView) => {
+      if (running) return;
+      setMapView(view);
+      setPathResult(null);
+      setExpCount(0);
+    },
+    [running],
+  );
 
   const loadSample = useCallback(async () => {
     setSampleLoading(true);
@@ -225,9 +245,7 @@ function SmartRoutePage() {
         .map((e) =>
           e.note
             ? `Floyd-Warshall ${e.note} — best ${start}→${goal}: ${e.gKm.toFixed(1)} km`
-            : e.via?.kind === "sea"
-              ? `Crossing to ${e.node} via sea/air route — ${e.via.km.toFixed(1)} km leg (${e.gKm.toFixed(1)} km so far)`
-              : `Expanding ${e.node} — ${e.gKm.toFixed(1)} km so far`,
+            : `Expanding ${e.node} — ${e.gKm.toFixed(1)} km so far`,
         ),
     ];
     if (phase === "done")
@@ -294,6 +312,11 @@ function SmartRoutePage() {
               }
             >
               <SmartMap
+                view={mapView}
+                onViewChange={changeMapView}
+                navigationDisabled={running}
+                expansions={expansions.slice(0, expCount)}
+                animationMs={TICK_MS[speed]}
                 start={start}
                 goal={goal}
                 expanded={expandedNames}
@@ -315,8 +338,16 @@ function SmartRoutePage() {
         >
           <div className="flex items-center justify-between">
             <h2 className="font-display text-sm font-semibold">Pathfinding</h2>
-            <span className="panel-eyebrow text-route">graph · {CITIES.length} cities</span>
+            <span className="panel-eyebrow text-route">
+              {graphReady ? `${CITIES.length} towns · ${EDGES.length} roads` : "Philippines"}
+            </span>
           </div>
+          {!graphReady && (
+            <p className="text-xs text-muted-foreground">
+              {GRAPH_ERROR ||
+                "Click Bohol on the map to choose towns and run pathfinding. Crypto and Text Lab are ready to use."}
+            </p>
+          )}
 
           <label className="space-y-1.5">
             <span className="panel-eyebrow">Algorithm</span>
@@ -341,7 +372,7 @@ function SmartRoutePage() {
                 aria-label="Start city"
                 value={start}
                 onChange={setStart}
-                disabled={running}
+                disabled={running || !graphReady}
               />
             </label>
             <label className="space-y-1.5">
@@ -350,7 +381,7 @@ function SmartRoutePage() {
                 aria-label="Destination city"
                 value={goal}
                 onChange={setGoal}
-                disabled={running}
+                disabled={running || !graphReady}
               />
             </label>
           </div>
@@ -646,7 +677,11 @@ function SmartRoutePage() {
 
             <section aria-label="Algorithm comparison" className="w-full">
               <h2 className="text-center text-xs text-muted-foreground">
-                Comparison of all four algorithms on {start} → {goal}
+                {graphReady
+                  ? `Comparison of all four algorithms on ${start} → ${goal}`
+                  : GRAPH_ERROR
+                    ? "Compare all four algorithms — generate the Bohol road data first"
+                    : "Compare all four algorithms — select Bohol to begin"}
               </h2>
               <div className="pt-3">
                 <Table>

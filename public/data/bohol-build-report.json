@@ -1,0 +1,360 @@
+{
+  "nodes": 47,
+  "totalTownCenters": 48,
+  "inaccessible": [
+    "President Carlos P. Garcia"
+  ],
+  "edges": 77,
+  "averageDegree": 3.276595744680851,
+  "components": [
+    [
+      "Alburquerque",
+      "Sikatuna",
+      "Sevilla",
+      "Loboc",
+      "Loay",
+      "Lila",
+      "Dimiao",
+      "Valencia",
+      "Garcia Hernandez",
+      "Sierra Bullones",
+      "Pilar",
+      "Dagohoy",
+      "San Miguel",
+      "Trinidad",
+      "Ubay",
+      "Mabini",
+      "Candijay",
+      "Guindulman",
+      "Duero",
+      "Jagna",
+      "Anda",
+      "Alicia",
+      "Talibon",
+      "Getafe",
+      "Buenavista",
+      "Inabanga",
+      "Clarin",
+      "Tubigon",
+      "San Isidro",
+      "Catigbian",
+      "Sagbayan",
+      "Carmen",
+      "Batuan",
+      "Bilar",
+      "Balilihan",
+      "Cortes",
+      "Maribojoc",
+      "Loon",
+      "Calape",
+      "Antequera",
+      "Corella",
+      "City of Tagbilaran",
+      "Dauis",
+      "Panglao",
+      "Baclayon",
+      "Danao",
+      "Bien Unido"
+    ]
+  ],
+  "warnings": [
+    "Skipped unassigned boundary 1909900000",
+    "OSM provided 14/48 municipal polygons; using the complete PSGC municipal topology from https://raw.githubusercontent.com/faeldon/philippines-json-maps/8eeead560246863c8c820c31ca6fbca81a279477/2023/geojson/provdists/hires/municities-provdist-701200000.0.1.json. Centers remain OSM place nodes.",
+    "Alburquerque — Baclayon: approximate center access 11.1 / 11.2 m",
+    "Alburquerque — Loay: approximate center access 11.1 / 11.1 m",
+    "Alburquerque — Sikatuna: approximate center access 11.1 / 12.0 m",
+    "Alicia — Candijay: approximate center access 25.5 / 11.5 m",
+    "Alicia — Pilar: approximate center access 25.5 / 29.4 m",
+    "Alicia — Ubay: approximate center access 25.5 / 25.8 m",
+    "Anda — Guindulman: approximate center access 26.2 / 3.3 m",
+    "Antequera — Balilihan: approximate center access 26.7 / 28.6 m",
+    "Antequera — Calape: approximate center access 26.7 / 16.2 m",
+    "Antequera — Loon: approximate center access 26.7 / 19.4 m",
+    "Antequera — Maribojoc: approximate center access 26.7 / 4.3 m",
+    "Antequera — San Isidro: approximate center access 26.7 / 43.0 m",
+    "Baclayon — City of Tagbilaran: approximate center access 11.2 / 21.6 m",
+    "Baclayon — Corella: approximate center access 11.2 / 34.4 m",
+    "Balilihan — Catigbian: approximate center access 28.6 / 14.9 m",
+    "Balilihan — Cortes: approximate center access 28.6 / 13.5 m",
+    "Balilihan — Sevilla: approximate center access 28.6 / 26.2 m",
+    "Balilihan — Sikatuna: approximate center access 28.6 / 12.0 m",
+    "Batuan — Bilar: approximate center access 9.4 / 20.6 m",
+    "Batuan — Carmen: approximate center access 9.4 / 25.5 m",
+    "Batuan — Catigbian: approximate center access 9.4 / 14.9 m",
+    "Bien Unido — Trinidad: approximate center access 9.7 / 9.4 m",
+    "Bilar — Dimiao: approximate center access 20.6 / 4.8 m",
+    "Bilar — Loboc: approximate center access 20.6 / 36.0 m",
+    "Buenavista — Danao: approximate center access 2.3 / 26.9 m",
+    "Buenavista — Getafe: approximate center access 2.3 / 31.3 m",
+    "Buenavista — Inabanga: approximate center access 2.3 / 6.9 m",
+    "Calape — Loon: approximate center access 16.2 / 19.4 m",
+    "Calape — San Isidro: approximate center access 16.2 / 43.0 m",
+    "Calape — Tubigon: approximate center access 16.2 / 13.5 m",
+    "Candijay — Guindulman: approximate center access 11.5 / 3.3 m",
+    "Candijay — Mabini: approximate center access 11.5 / 7.0 m",
+    "Candijay — Pilar: approximate center access 11.5 / 29.4 m",
+    "Carmen — Dagohoy: approximate center access 25.5 / 62.4 m",
+    "Carmen — Sagbayan: approximate center access 25.5 / 5.7 m",
+    "Carmen — Sierra Bullones: approximate center access 25.5 / 10.3 m",
+    "Catigbian — Clarin: approximate center access 14.9 / 23.7 m",
+    "Catigbian — Sagbayan: approximate center access 14.9 / 5.7 m",
+    "Catigbian — San Isidro: approximate center access 14.9 / 43.0 m",
+    "Catigbian — Tubigon: approximate center access 14.9 / 13.5 m",
+    "City of Tagbilaran — Corella: approximate center access 21.6 / 34.4 m",
+    "City of Tagbilaran — Cortes: approximate center access 21.6 / 13.5 m",
+    "City of Tagbilaran — Dauis: approximate center access 21.6 / 16.6 m",
+    "Clarin — Inabanga: approximate center access 23.7 / 6.9 m",
+    "Clarin — Sagbayan: approximate center access 23.7 / 5.7 m",
+    "Clarin — Tubigon: approximate center access 23.7 / 13.5 m",
+    "Corella — Cortes: approximate center access 34.4 / 13.5 m",
+    "Corella — Sikatuna: approximate center access 34.4 / 12.0 m",
+    "Cortes — Maribojoc: approximate center access 13.5 / 4.3 m",
+    "Dagohoy — Danao: approximate center access 62.4 / 26.9 m",
+    "Dagohoy — Pilar: approximate center access 62.4 / 29.4 m",
+    "Dagohoy — San Miguel: approximate center access 62.4 / 13.0 m",
+    "Danao — San Miguel: approximate center access 26.9 / 13.0 m",
+    "Danao — Trinidad: approximate center access 26.9 / 9.4 m",
+    "Dauis — Panglao: approximate center access 16.6 / 23.5 m",
+    "Dimiao — Lila: approximate center access 4.8 / 28.4 m",
+    "Dimiao — Valencia: approximate center access 4.8 / 12.8 m",
+    "Duero — Guindulman: approximate center access 32.1 / 3.3 m",
+    "Duero — Jagna: approximate center access 32.1 / 10.4 m",
+    "Garcia Hernandez — Jagna: approximate center access 31.1 / 10.4 m",
+    "Garcia Hernandez — Sierra Bullones: approximate center access 31.1 / 10.3 m",
+    "Garcia Hernandez — Valencia: approximate center access 31.1 / 12.8 m",
+    "Getafe — Talibon: approximate center access 31.3 / 8.8 m",
+    "Jagna — Sierra Bullones: approximate center access 10.4 / 10.3 m",
+    "Lila — Loay: approximate center access 28.4 / 11.1 m",
+    "Lila — Loboc: approximate center access 28.4 / 36.0 m",
+    "Loay — Loboc: approximate center access 11.1 / 36.0 m",
+    "Loboc — Sevilla: approximate center access 36.0 / 26.2 m",
+    "Loboc — Sikatuna: approximate center access 36.0 / 12.0 m",
+    "Loon — Maribojoc: approximate center access 19.4 / 4.3 m",
+    "Mabini — Ubay: approximate center access 7.0 / 25.8 m",
+    "Pilar — Sierra Bullones: approximate center access 29.4 / 10.3 m",
+    "San Isidro — Tubigon: approximate center access 43.0 / 13.5 m",
+    "San Miguel — Trinidad: approximate center access 13.0 / 9.4 m",
+    "Sevilla — Sikatuna: approximate center access 26.2 / 12.0 m",
+    "Talibon — Trinidad: approximate center access 8.8 / 9.4 m",
+    "Trinidad — Ubay: approximate center access 9.4 / 25.8 m"
+  ],
+  "rejected": [
+    {
+      "towns": [
+        "Alburquerque",
+        "Corella"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Alburquerque",
+        "Loboc"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Alicia",
+        "Mabini"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Anda",
+        "Candijay"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Antequera",
+        "Cortes"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Balilihan",
+        "Batuan"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Balilihan",
+        "Bilar"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Balilihan",
+        "Corella"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Balilihan",
+        "San Isidro"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Batuan",
+        "Dimiao"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Batuan",
+        "Sagbayan"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Batuan",
+        "Valencia"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Bien Unido",
+        "Talibon"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Bien Unido",
+        "Ubay"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Bilar",
+        "Lila"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Bilar",
+        "Sevilla"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Buenavista",
+        "Talibon"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Buenavista",
+        "Trinidad"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Carmen",
+        "Danao"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Carmen",
+        "Valencia"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Dagohoy",
+        "Sierra Bullones"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Dagohoy",
+        "Ubay"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Danao",
+        "Inabanga"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Danao",
+        "Sagbayan"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Duero",
+        "Pilar"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Duero",
+        "Sierra Bullones"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Guindulman",
+        "Pilar"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Inabanga",
+        "Sagbayan"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Pilar",
+        "Ubay"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "San Miguel",
+        "Ubay"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    },
+    {
+      "towns": [
+        "Sierra Bullones",
+        "Valencia"
+      ],
+      "reason": "Routes cross a third municipality or use a ferry"
+    }
+  ]
+}
