@@ -345,7 +345,7 @@ function SmartRoutePage() {
           {!graphReady && (
             <p className="text-xs text-muted-foreground">
               {GRAPH_ERROR ||
-                "Click Bohol on the map to choose towns and run pathfinding. Crypto and Text Lab are ready to use."}
+                "Click Bohol on the map to choose towns and run pathfinding. Crypto and text analysis are ready to use."}
             </p>
           )}
 
@@ -505,6 +505,9 @@ function SmartRoutePage() {
             <label htmlFor="sr-message" className="panel-eyebrow self-start">
               Message to encrypt
             </label>
+            <p className="self-start text-xs text-muted-foreground">
+              This same message is also used by the text search and compression demo below.
+            </p>
             <Textarea
               id="sr-message"
               value={message}
@@ -530,78 +533,107 @@ function SmartRoutePage() {
 
             <Collapsible className="w-full rounded-md border border-border bg-background p-3">
               <CollapsibleTrigger className="flex w-full items-center justify-between text-left text-sm font-semibold">
-                Text Lab <ChevronDown className="h-4 w-4" />
+                Text Analysis Lab · search, compress, choose <ChevronDown className="h-4 w-4" />
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-3 pt-3">
-                <label htmlFor="text-pattern" className="panel-eyebrow">
-                  Pattern to find
-                </label>
-                <div className="flex gap-2">
+              <CollapsibleContent className="space-y-4 pt-3 text-sm">
+                <p className="text-xs text-muted-foreground">
+                  Try the sample text, then follow these three steps. Search updates as you type;
+                  compression runs when you click its button.
+                </p>
+
+                <section className="space-y-2 rounded-md border border-border p-3">
+                  <h3 className="font-semibold">1. Search the message</h3>
+                  <label htmlFor="text-pattern" className="block text-xs text-muted-foreground">
+                    Word or phrase to find
+                  </label>
                   <Input
                     id="text-pattern"
                     value={pattern}
                     onChange={(e) => setPattern(e.target.value)}
-                    placeholder="Type a pattern…"
+                    placeholder="Type a word or phrase…"
                   />
-                  <Button onClick={runTextLab} disabled={running || sampleLoading}>
-                    Compress & optimize
-                  </Button>
-                </div>
-                <label htmlFor="speed-weight" className="block text-xs text-muted-foreground">
-                  Speed weight: {speedWeight}% · size weight: {100 - speedWeight}%
-                </label>
-                <input
-                  id="speed-weight"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={speedWeight}
-                  onChange={(e) => setSpeedWeight(Number(e.target.value))}
-                  className="w-full accent-primary"
-                />
-                <div aria-live="polite" className="space-y-2 text-sm">
-                  <p className="break-words">
-                    <strong>Live match positions:</strong>{" "}
-                    {liveMatches.kmp.positions.length
-                      ? liveMatches.kmp.positions.join(", ")
-                      : "None"}
-                  </p>
-                  <p>
-                    KMP comparisons: {liveMatches.kmp.comparisons} · Brute force:{" "}
-                    {liveMatches.brute.comparisons}
-                  </p>
+                  <div aria-live="polite" className="space-y-1">
+                    <p className="break-words">
+                      Found {liveMatches.kmp.positions.length} match(es) at position(s):{" "}
+                      {liveMatches.kmp.positions.length
+                        ? liveMatches.kmp.positions.join(", ")
+                        : "none"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      KMP checked {liveMatches.kmp.comparisons} characters; brute force checked{" "}
+                      {liveMatches.brute.comparisons}. Both find the same positions.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Positions start at 0; matching is case-sensitive. An empty pattern has no
+                      matches.
+                    </p>
+                  </div>
+                </section>
+
+                <section className="space-y-2 rounded-md border border-border p-3">
+                  <h3 className="font-semibold">2. Compress the message</h3>
                   <p className="text-xs text-muted-foreground">
-                    Searches the current message as you type. Case-sensitive; positions are
-                    zero-based UTF-16 offsets. Empty patterns have no matches.
+                    Huffman and two run-length encoding (RLE) settings try to shrink the same text.
                   </p>
+                  <Button onClick={runTextLab} disabled={running || sampleLoading}>
+                    Compare compression methods
+                  </Button>
                   {textLab && optimization && (
-                    <>
+                    <div aria-live="polite" className="space-y-1">
                       {textLab.text !== message && (
-                        <p className="text-xs text-muted-foreground">
-                          Message changed. Compress & optimize again to refresh these results.
+                        <p className="text-xs text-route">
+                          The message changed. Compare compression methods again for current sizes.
                         </p>
                       )}
+                      <p>Original size: {textLab.candidates[0]!.result.originalSize} bytes</p>
                       <p>
-                        <strong>Original:</strong> {textLab.candidates[0]!.result.originalSize}{" "}
-                        UTF-8 bytes
+                        Chosen compressed size: {optimization.choice.result.compressedSize} bytes ·
+                        ratio:{" "}
+                        {optimization.choice.result.ratio === null
+                          ? "n/a for empty text"
+                          : `${(optimization.choice.result.ratio * 100).toFixed(1)}%`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Sizes include encoding headers; ratio = compressed / original. All decoders{" "}
-                        {textLab.restored ? "reproduced" : "did not reproduce"} the input.
+                        {textLab.restored
+                          ? "All methods decompressed back to the original text."
+                          : "A decoder did not reproduce the original text."}{" "}
+                        A ratio below 100% means fewer bytes; short text may grow because of
+                        compression headers.
                       </p>
+                    </div>
+                  )}
+                </section>
+
+                <section className="space-y-2 rounded-md border border-border p-3">
+                  <h3 className="font-semibold">3. Choose the best method</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Move the slider to favor a smaller file or faster compression.
+                  </p>
+                  <label htmlFor="speed-weight" className="block text-xs text-muted-foreground">
+                    File size {100 - speedWeight}% · speed {speedWeight}%
+                  </label>
+                  <input
+                    id="speed-weight"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={speedWeight}
+                    onChange={(e) => setSpeedWeight(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                  {textLab && optimization ? (
+                    <div aria-live="polite" className="space-y-2">
                       <p>
-                        <strong>Optimizer choice:</strong> {optimization.choice.name} (
-                        {optimization.choice.result.compressedSize} bytes, score{" "}
-                        {optimization.choice.score.toFixed(3)})
+                        Best for this balance: <strong>{optimization.choice.name}</strong>
                       </p>
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Candidate</TableHead>
+                              <TableHead>Method</TableHead>
                               <TableHead>Bytes</TableHead>
                               <TableHead>Ratio</TableHead>
-                              <TableHead>Encode ms</TableHead>
+                              <TableHead>Time (ms)</TableHead>
                               <TableHead>Score ↓</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -626,13 +658,15 @@ function SmartRoutePage() {
                         </Table>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Select one complete encoding. Scores normalize size and measured encoding
-                        time across these candidates; lower is better. Timing is an average of 10
-                        runs and may vary between devices.
+                        Lower score wins. Each time is an average of 10 runs and may vary by device.
                       </p>
-                    </>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Compare compression methods in step 2 to see the choice.
+                    </p>
                   )}
-                </div>
+                </section>
               </CollapsibleContent>
             </Collapsible>
 
@@ -657,7 +691,7 @@ function SmartRoutePage() {
                 className="ml-2"
               >
                 <FastForward className="mr-1.5 h-3.5 w-3.5" />
-                Skip to result
+                Skip to animation
               </Button>
             </div>
 

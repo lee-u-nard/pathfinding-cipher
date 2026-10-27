@@ -46,6 +46,21 @@ navigation is disabled to keep the animation and selected graph consistent.
 Crypto and Text Lab work even if road data is absent or the country view is
 selected. Sample loading and manual typing still share the same message field.
 
+## Short classroom demo
+
+1. Click **Load sample text** and expand **Text Analysis Lab**. The sample's
+   repeated `pattern` word makes the live KMP/brute-force match positions and
+   comparison counts easy to show.
+2. Click **Compare compression methods**. Point out the original byte count,
+   compressed byte count, ratio, and successful decompression check. Huffman
+   and both RLE settings encode the same message.
+3. Move the **File size / speed** slider. The table shows each candidate's
+   actual size, measured time, and score; the lowest score is selected. This
+   demonstrates discrete optimization over three compression settings.
+4. Select **RSA** and press **Run**. Its key-generation log shows Miller-Rabin
+   probable-prime tests, the project's randomized algorithm. The complexity
+   table below covers the main algorithms' time and space costs.
+
 ## Reproducible offline data pipeline
 
 `npm run build:data` runs `scripts/build-bohol-graph.mjs`. Network requests
